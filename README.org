@@ -1,0 +1,47 @@
+* Force an application to bind to a specific IP
+** Description
+This repo serves as a mirror of a bind shim written by [[http://www.ryde.net][Daniel Ryde]], which was downloaded from [[http://www.ryde.net/code/bind.c.txt][here]].  Another copy of it exists [[http://daniel-lange.com/software/bind.c][here]].
+
+More information about the shim and how and why to use it can be found in [[http://daniel-lange.com/authors/1-Daniel-Lange][Daniel Lange]]'s article [[http://daniel-lange.com/archives/53-Binding-applications-to-a-specific-IP.html][Binding applications to a specific IP]]
+** In brief, you can:
+*** 1 - Just type "make"
+which will run:
+```
+gcc -nostartfiles -fpic -shared bind.c -o bind.so -ldl -D_GNU_SOURCE
+```
+*** 2 - Type: BIND_ADDR="AAA.BBB.CCC.DDD" LD_PRELOAD=/path/to/where/you/have/placed/bind.so YOUR_APPLICATION
+Where
+**** AAA.BBB.CCC.DDD is the IP address you want to force your APPLICATION to bind to
+**** /path/to/where/you/have/placed/bind.so is the location of bind.so on your filesystem
+**** APPLICATION is the name of the application you want to force to bind to the above ip address
+** Original information found in the comments of bind.c
+LD_PRELOAD library to make bind and connect to use a virtual
+IP address as localaddress. Specified via the enviroment
+variable BIND_ADDR.
+
+Compile on Linux with:
+gcc -nostartfiles -fpic -shared bind.c -o bind.so -ldl -D_GNU_SOURCE
+
+
+Example in bash to make inetd only listen to the localhost
+lo interface, thus disabling remote connections and only
+enable to/from localhost:
+
+BIND_ADDR="127.0.0.1" LD_PRELOAD=./bind.so /sbin/inetd
+
+
+Example in bash to use your virtual IP as your outgoing
+sourceaddress for ircII:
+
+BIND_ADDR="your-virt-ip" LD_PRELOAD=./bind.so ircII
+
+Note that you have to set up your servers virtual IP first.
+
+
+This program was made by Daniel Ryde
+email: daniel@ryde.net
+web:   http://www.ryde.net/
+
+TODO: I would like to extend it to the accept calls too, like a
+general tcp-wrapper. Also like an junkbuster for web-banners.
+For libc5 you need to replace socklen_t with int.
